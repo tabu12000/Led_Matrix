@@ -1,3 +1,0 @@
-Test File filled with cool text
-
-An addition that is going to be reverted
