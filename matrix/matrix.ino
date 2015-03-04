@@ -9,7 +9,7 @@
 Char2Array converter;
 
 
-
+const int clr = 2;
 const int data = 4;
 const int clock = 5;
 const int latch = 6;
@@ -18,11 +18,13 @@ const int blank = 7;
 const int button_pin = 3;
 const int led_pin = 12;
 
-const int total_shifts = 6;
-int shift_count = 0;
+const int rows = 6;
+int shift_count = rows - 1;
 
+//Shifts the register by one, also loops when needed
 void shift(){
-  if(shift_count > total_shifts - 2){
+  if(shift_count == rows){shift_count = 0;}
+  if(shift_count == rows - 1){
     digitalWrite(data, HIGH);
     digitalWrite(clock, HIGH);
     digitalWrite(data, LOW);
@@ -40,6 +42,24 @@ void shift(){
   digitalWrite(latch, HIGH);
   digitalWrite(latch, LOW);
   
+}
+
+//Shifts the register to a given position
+void shift_to(int pos){
+  if(pos < rows && pos >= 0){
+  digitalWrite(blank, HIGH);
+  while(pos != shift_count){shift();} 
+  digitalWrite(blank, LOW);
+  }
+}
+
+// Resets the shift register to position one, guaranteed to work
+void shift_reset(){
+  digitalWrite(clr, LOW);
+  delay(5);
+  digitalWrite(clr, HIGH);
+  shift_count = rows - 1;
+  shift();
 }
 
 //Gets the next complete input from serial
@@ -113,15 +133,17 @@ void setup(){
    pinMode(data, OUTPUT);
    pinMode(clock, OUTPUT);
    pinMode(blank, OUTPUT);
+   pinMode(clr, OUTPUT);
    
+   digitalWrite(clr, HIGH);
+   shift_reset();
+   
+   
+   Serial.begin(9600);
    //check_for_button();
  }
 
 
 void loop(){
-   shift();
-   delay(250);
-   
-   
-  
+   shift_to(wait_for_next().toInt());
 }
